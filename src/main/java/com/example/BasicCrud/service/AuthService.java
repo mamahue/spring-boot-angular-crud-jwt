@@ -1,5 +1,6 @@
 package com.example.BasicCrud.service;
 
+import com.example.BasicCrud.dto.autResponse;
 import com.example.BasicCrud.dto.logindto;
 import com.example.BasicCrud.dto.registerDto;
 import com.example.BasicCrud.model.TypeUser;
@@ -16,7 +17,8 @@ public class AuthService {
  private final UserRepository userRepository;
  private  final TypeUserRepo typeUserRepo;
  private final PasswordEncoder passwordEncoder;
-    public User register (registerDto dto){
+ private final jwUtil jwUtil;
+    public autResponse register (registerDto dto){
         TypeUser type =  typeUserRepo.findBytype(dto.type())
                 .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
         User user = new User();
@@ -25,16 +27,20 @@ public class AuthService {
         user.setUsername(dto.username());
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setTypeUser(type);
-   return userRepository.save(user);
+        User saveduser = userRepository.save(user);
+        String token = jwUtil.generateToken(dto.username(),user.getTypeUser().getType());
+   return new autResponse(token,saveduser.getUsername(),saveduser.getTypeUser().getType());
     }
 
-    public User login(logindto dto){
+    public autResponse login(logindto dto){
         User user = userRepository.findByUsername(dto.username())
                 .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
         if (!passwordEncoder.matches(dto.password(), user.getPassword())){
             throw  new RuntimeException("credenciales no validas");
         }
-        return  user;
+        String token = jwUtil.generateToken(user.getUsername(), user.getTypeUser().getType());
+
+        return  new autResponse(token, user.getUsername(),user.getTypeUser().getType());
 
     }
 }

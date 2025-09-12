@@ -1,5 +1,6 @@
 package com.example.BasicCrud.controller;
 
+import com.example.BasicCrud.dto.autResponse;
 import com.example.BasicCrud.dto.logindto;
 import com.example.BasicCrud.dto.registerDto;
 import com.example.BasicCrud.model.User;
@@ -9,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 @RestController
@@ -20,21 +20,20 @@ public class authController {
     private AuthService authService;
 
     @PostMapping("register/")
-    private ResponseEntity<User> registerUser (@RequestBody registerDto dto) throws URISyntaxException {
+    private ResponseEntity<autResponse> registerUser (@RequestBody registerDto dto) throws URISyntaxException {
         try {
-            User crateUser = authService.register(dto);
-            return  ResponseEntity.created(new URI("auth/register"+crateUser.getId())).body(crateUser);
+            return  ResponseEntity.ok(authService.register(dto));
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
     @PostMapping("login/")
-    private  ResponseEntity<User> loginUser(@RequestBody logindto dto) throws URISyntaxException {
+    private  ResponseEntity<autResponse> loginUser(@RequestBody logindto dto) throws URISyntaxException {
 
         try {
 
-            User loginUser = authService.login(dto);
+            autResponse loginUser = authService.login(dto);
             return ResponseEntity.ok(loginUser);
         }catch ( Exception e){
             return  ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
