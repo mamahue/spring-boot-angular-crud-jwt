@@ -8,6 +8,7 @@ import com.example.BasicCrud.model.User;
 import com.example.BasicCrud.repository.TypeUserRepo;
 import com.example.BasicCrud.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,8 @@ public class AuthService {
  private  final TypeUserRepo typeUserRepo;
  private final PasswordEncoder passwordEncoder;
  private final jwUtil jwUtil;
+ @Autowired
+ private UserService userService;
     public autResponse register (registerDto dto){
         TypeUser type =  typeUserRepo.findBytype(dto.type())
                 .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
@@ -27,7 +30,7 @@ public class AuthService {
         user.setUsername(dto.username());
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setTypeUser(type);
-        User saveduser = userRepository.save(user);
+        User saveduser = userService.save(user);
         String token = jwUtil.generateToken(dto.username(),user.getTypeUser().getType());
    return new autResponse(token,saveduser.getUsername(),saveduser.getTypeUser().getType());
     }
@@ -38,6 +41,7 @@ public class AuthService {
         if (!passwordEncoder.matches(dto.password(), user.getPassword())){
             throw  new RuntimeException("credenciales no validas");
         }
+
         String token = jwUtil.generateToken(user.getUsername(), user.getTypeUser().getType());
 
         return  new autResponse(token, user.getUsername(),user.getTypeUser().getType());
