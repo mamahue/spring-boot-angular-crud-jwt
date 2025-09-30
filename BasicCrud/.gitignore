@@ -35,3 +35,18 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Archivos y carpetas de Gradle
+.gradle/
+build/
+
+# Archivos de IDE
+.idea/
+*.iml
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de log
+*.log
