@@ -1,6 +1,7 @@
 package com.example.BasicCrud.controller;
 
 import com.example.BasicCrud.dto.updateUser;
+import com.example.BasicCrud.dto.userDto;
 import com.example.BasicCrud.model.User;
 import com.example.BasicCrud.repository.UserRepository;
 import com.example.BasicCrud.service.UserService;
@@ -123,8 +124,8 @@ public class userController {
                       @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
               }
       )
-       public   ResponseEntity<User> updateUsers(@PathVariable("id") Long id,
-                                                 @RequestBody  updateUser update, Authentication authentication){
+       public   ResponseEntity<userDto> updateUsers(@PathVariable("id") Long id,
+                                                    @RequestBody  updateUser update, Authentication authentication){
        User existeUser= userService.findById(id);
           if (existeUser == null) {
               return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -139,13 +140,19 @@ public class userController {
        existeUser.setName(update.name());
        existeUser.setEmail(update.email());
        existeUser.setUsername(update.username());
-       existeUser.setPassword(passwordEncoder.encode(update.password()));
-      if (update.password() != null && !update.password().isBlank()) {
-         existeUser.setPassword(passwordEncoder.encode(update.password()));
-        }
-       User response =userService.save(existeUser);
 
-     return  ResponseEntity.ok(response);
+          if (update.newpassword() != null && !update.newpassword().isEmpty()) {
+              existeUser.setPassword(passwordEncoder.encode(update.newpassword()));
+          }
+
+       User response =userService.save(existeUser);
+          userDto dto = new userDto(
+                  response.getName(),
+                  response.getEmail(),
+                  response.getUsername(),
+                  response.getTypeUser().getType()
+          );
+     return  ResponseEntity.ok(dto);
       }
 
 }

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
@@ -95,8 +96,11 @@ public class authController {
 
             autResponse loginUser = authService.login(dto);
             return ResponseEntity.ok(loginUser);
-        }catch ( Exception e){
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
     }

@@ -9,6 +9,8 @@ import com.example.BasicCrud.repository.TypeUserRepo;
 import com.example.BasicCrud.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,20 +33,23 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setTypeUser(type);
         User saveduser = userService.save(user);
-        String token = jwUtil.generateToken(dto.username(),user.getTypeUser().getType());
-   return new autResponse(token,saveduser.getUsername(),saveduser.getTypeUser().getType());
+        String token = jwUtil.generateToken(dto.username(),user.getTypeUser().getType(),user.getId());
+   return new autResponse(token,saveduser.getUsername(),saveduser.getTypeUser().getType(),saveduser.getId());
     }
 
     public autResponse login(logindto dto){
+        System.out.println("Intento de login con usuario: " + dto.username());
         User user = userRepository.findByUsername(dto.username())
-                .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(()-> new UsernameNotFoundException("Usuario no encontrado"));
+
+
         if (!passwordEncoder.matches(dto.password(), user.getPassword())){
-            throw  new RuntimeException("credenciales no validas");
+            throw  new BadCredentialsException("credenciales no validas");
         }
 
-        String token = jwUtil.generateToken(user.getUsername(), user.getTypeUser().getType());
+        String token = jwUtil.generateToken(user.getUsername(), user.getTypeUser().getType() ,user.getId());
 
-        return  new autResponse(token, user.getUsername(),user.getTypeUser().getType());
+        return  new autResponse(token, user.getUsername(),user.getTypeUser().getType() , user.getId());
 
     }
 }
